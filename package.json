@@ -1,0 +1,13 @@
+{
+  "name": "raider-wordpress-build",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Build tooling (image optimization) for the Raider WordPress theme. Not bundled with the theme itself.",
+  "scripts": {
+    "images": "node build/build-images.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.0"
+  }
+}

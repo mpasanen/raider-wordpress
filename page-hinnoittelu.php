@@ -1,12 +1,21 @@
 <?php
 /**
- * Template for the "Hinnoittelu" page (slug-based: page-hinnoittelu.php).
+ * Template for the "Hinnoittelu" page.
+ *
+ * Pricing cards come from the "Hinnoittelu" custom post type
+ * (Admin → Hinnoittelu). When no entries exist yet, the bundled
+ * defaults are used as a graceful fallback.
  *
  * @package Raider
  */
 
-if ( have_posts() ) { the_post(); rewind_posts(); }
+if ( have_posts() ) {
+	the_post();
+	rewind_posts();
+}
 get_header();
+
+$groups = raider_get_pricing_cards();
 ?>
 <section class="section">
 	<div class="container">
@@ -15,74 +24,34 @@ get_header();
 			<?php raider_the_field( 'intro_text', __( 'Selkeät paketit ja läpinäkyvä hinnoittelu. Kaikki hinnat alv 0 %.', 'raider' ), true ); ?>
 		</div>
 
-		<div class="pricing-group">
-			<h2>Videotuotanto</h2>
-			<div class="price-grid">
-				<article class="price-card">
-					<h3>10 kpl lyhytvideoita</h3>
-					<div class="price">1 800 € <small>(alv 0)</small></div>
-					<ul>
-						<li>10 julkaisuvalmista lyhytvideota</li>
-						<li>Kuvaus + editointi</li>
-						<li>Matkakulut 300 km säteellä (ei majoitusta)</li>
-						<li>Sisällön suunnittelu yhdessä lyhyesti, jotta tyyli ja viesti osuvat kohdalleen</li>
-					</ul>
-					<a class="btn btn--ghost" href="<?php echo esc_url( home_url( '/ota-yhteytta/' ) ); ?>"><?php esc_html_e( 'Pyydä tarjous', 'raider' ); ?></a>
-				</article>
-				<article class="price-card">
-					<h3>Jatkuva tuotanto 3 kk</h3>
-					<div class="price">4 100 € <small>(alv 0)</small></div>
-					<ul>
-						<li>25 lyhytvideota (3 kk tuotanto)</li>
-						<li>Kuvaus + editointi</li>
-						<li>Matkakulut 300 km säteellä</li>
-					</ul>
-					<a class="btn btn--ghost" href="<?php echo esc_url( home_url( '/ota-yhteytta/' ) ); ?>"><?php esc_html_e( 'Pyydä tarjous', 'raider' ); ?></a>
-				</article>
+		<?php foreach ( $groups as $group_name => $cards ) : ?>
+			<div class="pricing-group">
+				<h2><?php echo esc_html( $group_name ); ?></h2>
+				<div class="price-grid">
+					<?php foreach ( $cards as $card ) : ?>
+						<article class="price-card">
+							<h3><?php echo esc_html( $card['title'] ); ?></h3>
+							<?php if ( ! empty( $card['price'] ) ) : ?>
+								<div class="price">
+									<?php echo esc_html( $card['price'] ); ?>
+									<?php if ( ! empty( $card['unit'] ) ) : ?>
+										<small><?php echo esc_html( $card['unit'] ); ?></small>
+									<?php endif; ?>
+								</div>
+							<?php endif; ?>
+							<?php if ( ! empty( $card['features'] ) ) : ?>
+								<ul>
+									<?php foreach ( $card['features'] as $feature ) : ?>
+										<li><?php echo esc_html( $feature ); ?></li>
+									<?php endforeach; ?>
+								</ul>
+							<?php endif; ?>
+							<a class="btn btn--ghost" href="<?php echo esc_url( $card['cta_url'] ); ?>"><?php echo esc_html( $card['cta_text'] ); ?></a>
+						</article>
+					<?php endforeach; ?>
+				</div>
 			</div>
-		</div>
-
-		<div class="pricing-group">
-			<h2>Asiakaskokemusvideo</h2>
-			<div class="price-grid">
-				<article class="price-card">
-					<h3>Lyhytvideo</h3>
-					<div class="price">300 € <small>/kpl</small></div>
-					<ul>
-						<li>Kuvaus + editointi</li>
-						<li>Napakka asiakaskokemus lyhytvideon muodossa</li>
-						<li>Mainio Reels / TikTok / Shorts -käyttöön</li>
-					</ul>
-					<a class="btn btn--ghost" href="<?php echo esc_url( home_url( '/ota-yhteytta/' ) ); ?>"><?php esc_html_e( 'Pyydä tarjous', 'raider' ); ?></a>
-				</article>
-				<article class="price-card">
-					<h3>Perinteinen 2–3 min</h3>
-					<div class="price">800 € <small>/kpl</small></div>
-					<ul>
-						<li>Kuvaus + editointi</li>
-						<li>Syvempää tarinointia ja enemmän sisältöä</li>
-						<li>Sopii nettisivuille, myyntiin ja referenssikäyttöön</li>
-					</ul>
-					<a class="btn btn--ghost" href="<?php echo esc_url( home_url( '/ota-yhteytta/' ) ); ?>"><?php esc_html_e( 'Pyydä tarjous', 'raider' ); ?></a>
-				</article>
-			</div>
-		</div>
-
-		<div class="pricing-group">
-			<h2>Someapu</h2>
-			<div class="price-grid">
-				<article class="price-card">
-					<h3>Peruspaketti</h3>
-					<div class="price">200 € <small>/kk (alv 0)</small></div>
-					<ul>
-						<li>2 julkaisua viikossa</li>
-						<li>2 h / vko yrityksen viestinnän kehitystä</li>
-						<li>Pois lukien kommenttien ja DM-viestien vastaaminen</li>
-					</ul>
-					<a class="btn btn--ghost" href="<?php echo esc_url( home_url( '/ota-yhteytta/' ) ); ?>"><?php esc_html_e( 'Pyydä tarjous', 'raider' ); ?></a>
-				</article>
-			</div>
-		</div>
+		<?php endforeach; ?>
 
 		<div class="cta-wrap">
 			<a class="btn" href="<?php echo esc_url( home_url( '/ota-yhteytta/' ) ); ?>"><?php esc_html_e( 'Ota yhteyttä ja pyydä tarjous', 'raider' ); ?></a>

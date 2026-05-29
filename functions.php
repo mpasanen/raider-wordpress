@@ -18,3 +18,4 @@ require_once RAIDER_DIR . '/inc/template-tags.php';
 require_once RAIDER_DIR . '/inc/pages.php';
 require_once RAIDER_DIR . '/inc/contact-form.php';
 require_once RAIDER_DIR . '/inc/page-fields.php';
+require_once RAIDER_DIR . '/inc/client-logos.php';

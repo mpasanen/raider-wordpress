@@ -5,15 +5,16 @@
  * @package Raider
  */
 
+if ( have_posts() ) { the_post(); rewind_posts(); }
 get_header();
 ?>
 <section class="section">
 	<div class="container">
 		<div class="grid-2">
 			<div>
-				<h1><?php esc_html_e( 'Ota yhteyttä', 'raider' ); ?></h1>
+				<h1><?php the_title(); ?></h1>
 				<h2 style="color: var(--c-red); margin-top: 0;">Tommi Parhiala</h2>
-				<p><?php esc_html_e( 'Lyhytvideot, mainosvideot ja someapu yrityksellesi. Tehdään yhdessä tehokasta sisältöä, joka tuottaa tulosta.', 'raider' ); ?></p>
+				<?php raider_the_field( 'lead_text', __( 'Lyhytvideot, mainosvideot ja someapu yrityksellesi. Tehdään yhdessä tehokasta sisältöä, joka tuottaa tulosta.', 'raider' ), true ); ?>
 				<address style="font-style: normal; font-size: 1.1rem; line-height: 1.8;">
 					<strong>Puhelin:</strong> <a href="tel:+358407245604">040 7245604</a><br>
 					<strong>Sähköposti:</strong> <a href="mailto:tommi.parhiala@gmail.com">tommi.parhiala@gmail.com</a><br>
@@ -40,8 +41,10 @@ get_header();
 
 <section class="section section--alt">
 	<div class="container">
-		<h2 class="text-center"><?php esc_html_e( 'Boostia somemarkkinointiin', 'raider' ); ?></h2>
-		<p class="text-center" style="max-width: 640px; margin-inline: auto;"><?php esc_html_e( 'Kerro lyhyesti, mitä tarvitset — palaan asiaan yleensä saman päivän aikana.', 'raider' ); ?></p>
+		<h2 class="text-center"><?php raider_the_field( 'form_heading', __( 'Boostia somemarkkinointiin', 'raider' ) ); ?></h2>
+		<div class="text-center" style="max-width: 640px; margin-inline: auto;">
+			<?php raider_the_field( 'form_subtext', __( 'Kerro lyhyesti, mitä tarvitset — palaan asiaan yleensä saman päivän aikana.', 'raider' ), true ); ?>
+		</div>
 		<?php raider_contact_form( true ); ?>
 	</div>
 </section>

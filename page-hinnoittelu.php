@@ -5,14 +5,15 @@
  * @package Raider
  */
 
+if ( have_posts() ) { the_post(); rewind_posts(); }
 get_header();
 ?>
 <section class="section">
 	<div class="container">
-		<h1 class="text-center"><?php esc_html_e( 'Hinnoittelu', 'raider' ); ?></h1>
-		<p class="text-center" style="max-width: 640px; margin-inline: auto;">
-			<?php esc_html_e( 'Selkeät paketit ja läpinäkyvä hinnoittelu. Kaikki hinnat alv 0 %.', 'raider' ); ?>
-		</p>
+		<h1 class="text-center"><?php the_title(); ?></h1>
+		<div class="text-center" style="max-width: 640px; margin-inline: auto;">
+			<?php raider_the_field( 'intro_text', __( 'Selkeät paketit ja läpinäkyvä hinnoittelu. Kaikki hinnat alv 0 %.', 'raider' ), true ); ?>
+		</div>
 
 		<div class="pricing-group">
 			<h2>Videotuotanto</h2>

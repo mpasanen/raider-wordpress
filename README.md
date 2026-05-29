@@ -112,8 +112,13 @@ raider-wordpress/
 
 ## Editing content
 
-- Page bodies are PHP templates, not the WordPress editor — text lives in the template files (e.g. `front-page.php`, `page-meista.php`). This is what allows the theme to keep zero block-editor CSS on the front end.
-- For longer-term editorial flexibility, convert any section to ACF fields or block patterns — but be prepared for a small perf cost.
+Open any page (Etusivu, Hinnoittelu, Meistä, Ota yhteyttä, Kiitos) in the WordPress admin. Each one shows a **"Sisältö (Raider)"** meta box with simple text/textarea fields for every editable string (hero tagline, intro text, service descriptions, process steps, quote, etc.).
+
+- Leave a field empty → the theme uses the default text shown when the site is first installed.
+- The block editor is **intentionally disabled** on these pages because the layout is rendered fully from PHP templates. The page title (used as the `<h1>` on inner pages) is still editable from the title bar at the top of the editor.
+- Field configuration lives in `inc/page-fields.php`. Add more fields there if a stakeholder needs to edit a string that's currently hardcoded — declare the field, then reference it in the template with `raider_the_field( 'my_key', 'default text', $paragraphs = false )`.
+
+For longer-term editorial flexibility (e.g. dynamic pricing cards, image swaps), convert that specific section to ACF fields — but be prepared for a small perf cost when ACF's frontend JS lands.
 
 ## Credits
 

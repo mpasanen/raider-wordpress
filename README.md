@@ -90,11 +90,17 @@ raider-wordpress/
     template-tags.php     # raider_picture() responsive <picture> helper
     pages.php             # auto-bootstrap pages on activation
     contact-form.php      # native contact form + handler
+    page-fields.php       # "Sisältö (Raider)" meta box fields per page
+    client-logos.php      # Asiakaslogot CPT (logo marquee)
+    pricing-cards.php     # Hinnoittelu CPT (pricing cards) + bundled default price list
+    analytics.php         # cookieless visitor analytics: REST endpoint, tables, inline script
+    analytics-report.php  # admin report (Kävijäseuranta)
   template-parts/
     logo-marquee.php
   assets/
     css/critical.css      # inlined in <head> via __THEME_URI__ substitution
     css/main.css          # deferred
+    js/analytics.js       # ~1.7 kB tracking script, inlined in the footer
     fonts/*.woff2
     images/
       hero.jpg            # original source
@@ -118,7 +124,26 @@ Open any page (Etusivu, Hinnoittelu, Meistä, Ota yhteyttä, Kiitos) in the Word
 - The block editor is **intentionally disabled** on these pages because the layout is rendered fully from PHP templates. The page title (used as the `<h1>` on inner pages) is still editable from the title bar at the top of the editor.
 - Field configuration lives in `inc/page-fields.php`. Add more fields there if a stakeholder needs to edit a string that's currently hardcoded — declare the field, then reference it in the template with `raider_the_field( 'my_key', 'default text', $paragraphs = false )`.
 
+### Pricing cards
+
+*Admin → Hinnoittelu*. Until a card is added there, `/hinnoittelu/` renders the bundled default price list from `raider_get_default_pricing()` in `inc/pricing-cards.php`. Once the defaults have been imported (or any card added), the admin is the source of truth and changing the defaults in code no longer affects the page — edit the cards in the admin, or ship a one-time update like the one at the bottom of that file.
+
+### Photo on the Meistä page
+
+Set a featured image (*Artikkelikuva*) on the Meistä page to replace the bundled photo. Fill in the image's alt text in the media library. Without a featured image the theme shows the bundled, pre-optimized photo.
+
 For longer-term editorial flexibility (e.g. dynamic pricing cards, image swaps), convert that specific section to ACF fields — but be prepared for a small perf cost when ACF's frontend JS lands.
+
+## Visitor analytics
+
+The theme ships its own cookieless analytics — no third-party script, no consent banner needed, data stays in the site's database.
+
+- **Report:** *Admin → Kävijäseuranta*: visitors, page views, time on site, traffic sources and campaigns (`utm_source`, `utm_campaign`), most viewed pages, devices and contacts (taps on phone, e-mail and WhatsApp links, sent contact forms).
+- **How it works:** `assets/js/analytics.js` is inlined in the footer and runs after page load. It posts to the REST route `raider/v1/s`; rows go to the tables `{prefix}raider_views` and `{prefix}raider_events`, created automatically. Contact form submissions are counted on the server in the form handler.
+- **Privacy:** nothing is stored in the browser and the IP address is never saved. A visitor is recognised for one day by a hash of IP + user agent + a salt that changes daily. Rows are deleted after 25 months. A suggested privacy policy paragraph appears under *Settings → Privacy → policy guide*.
+- **Not counted:** logged-in users, bots and measurement tools (Lighthouse, PageSpeed). Test in a private window.
+- **Requirements:** the REST API must be reachable for anonymous visitors (`/wp-json/raider/v1/s`). If a security plugin blocks the REST API, allow this route.
+- **Turn off:** `add_filter( 'raider_stats_enabled', '__return_false' );`
 
 ## Credits
 

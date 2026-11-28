@@ -165,6 +165,9 @@ function raider_handle_contact() {
 
 	wp_mail( $to, $subject, $body, $headers );
 
+	// Lets the visitor analytics (inc/analytics.php) count the submission.
+	do_action( 'raider_contact_submitted' );
+
 	wp_safe_redirect( home_url( '/kiitos/' ) );
 	exit;
 }

@@ -19,17 +19,35 @@ get_header();
 				<p style="margin-top: 2rem;"><a class="btn" href="<?php echo esc_url( home_url( '/ota-yhteytta/' ) ); ?>"><?php esc_html_e( 'Ota yhteyttä', 'raider' ); ?></a></p>
 			</div>
 			<?php
-			raider_picture(
-				array(
-					'name'   => 'about',
-					'widths' => array( 360, 540, 720, 960 ),
-					'sizes'  => '(max-width: 720px) 100vw, 50vw',
-					'alt'    => 'Kuvauskalustoa pöydällä',
-					'dir'    => 'images/optimized',
-					'width'  => 960,
-					'height' => 640,
-				)
-			);
+			// Photo of Tommi / the company. The page's featured image (Artikkelikuva)
+			// overrides the bundled photo, so it can be swapped from the admin.
+			$raider_about_sizes = '(max-width: 720px) 100vw, 50vw';
+			if ( has_post_thumbnail() ) {
+				$raider_about_id  = get_post_thumbnail_id();
+				$raider_about_alt = trim( (string) get_post_meta( $raider_about_id, '_wp_attachment_image_alt', true ) );
+				echo wp_get_attachment_image(
+					$raider_about_id,
+					'large',
+					false,
+					array(
+						'sizes'   => $raider_about_sizes,
+						'loading' => 'lazy',
+						'alt'     =>'' !== $raider_about_alt ? $raider_about_alt : 'Tommi Parhiala, Raider Production',
+					)
+				);
+			} else {
+				raider_picture(
+					array(
+						'name'   => 'contact',
+						'widths' => array( 360, 540, 720, 960 ),
+						'sizes'  => $raider_about_sizes,
+						'alt'    => 'Tommi Parhiala valmistelee kuvauskalustoa',
+						'dir'    => 'images/optimized',
+						'width'  => 960,
+						'height' => 1269,
+					)
+				);
+			}
 			?>
 		</div>
 	</div>

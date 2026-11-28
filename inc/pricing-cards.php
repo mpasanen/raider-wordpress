@@ -335,11 +335,11 @@ function raider_get_default_pricing() {
 		),
 		array(
 			'group'    => 'Videotuotanto',
-			'title'    => 'Jatkuva tuotanto 3 kk',
-			'price'    => '4 100 €',
+			'title'    => 'Jatkuva tuotanto 6 kk',
+			'price'    => '4 500 €',
 			'unit'     => '(alv 0)',
 			'features' => array(
-				'25 lyhytvideota (3 kk tuotanto)',
+				'48 lyhytvideota (6 kk tuotanto)',
 				'Kuvaus + editointi',
 				'Matkakulut 300 km säteellä',
 			),

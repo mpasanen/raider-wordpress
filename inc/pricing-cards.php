@@ -20,7 +20,7 @@
 defined( 'ABSPATH' ) || exit;
 
 const RAIDER_PRICE_CPT       = 'raider_price';
-const RAIDER_PRICE_CACHE_KEY = 'raider_pricing_cards_v1';
+const RAIDER_PRICE_CACHE_KEY = 'raider_pricing_cards_v2';
 
 /* ---------- Register CPT ---------- */
 
@@ -253,7 +253,7 @@ add_action(
 			return;
 		}
 		$url = wp_nonce_url( admin_url( 'edit.php?post_type=' . RAIDER_PRICE_CPT . '&raider_import_pricing=1' ), 'raider_import_pricing' );
-		echo '<div class="notice notice-info"><p><strong>' . esc_html__( 'Et ole vielä lisännyt yhtään hintapakettia.', 'raider' ) . '</strong> ' . esc_html__( '/hinnoittelu/-sivulla näkyy tällä hetkellä viiden paketin oletushinnasto. Voit tuoda sen tähän muokattavaksi yhdellä klikkauksella.', 'raider' );
+		echo '<div class="notice notice-info"><p><strong>' . esc_html__( 'Et ole vielä lisännyt yhtään hintapakettia.', 'raider' ) . '</strong> ' . esc_html__( '/hinnoittelu/-sivulla näkyy tällä hetkellä kuuden paketin oletushinnasto. Voit tuoda sen tähän muokattavaksi yhdellä klikkauksella.', 'raider' );
 		echo ' <a class="button button-primary" href="' . esc_url( $url ) . '">' . esc_html__( 'Tuo oletushinnasto', 'raider' ) . '</a></p></div>';
 	}
 );
@@ -310,10 +310,22 @@ function raider_get_default_pricing() {
 		array(
 			'group'    => 'Videotuotanto',
 			'title'    => '10 kpl lyhytvideoita',
-			'price'    => '1 800 €',
+			'price'    => '1 000 €',
 			'unit'     => '(alv 0)',
 			'features' => array(
 				'10 julkaisuvalmista lyhytvideota',
+				'Kuvaus + editointi',
+			),
+			'cta_text' => 'Pyydä tarjous',
+			'cta_url'  => $ota,
+		),
+		array(
+			'group'    => 'Videotuotanto',
+			'title'    => '16 kpl lyhytvideoita',
+			'price'    => '1 800 €',
+			'unit'     => '(alv 0)',
+			'features' => array(
+				'16 julkaisuvalmista lyhytvideota',
 				'Kuvaus + editointi',
 				'Matkakulut 300 km säteellä (ei majoitusta)',
 				'Sisällön suunnittelu yhdessä lyhyesti, jotta tyyli ja viesti osuvat kohdalleen',
@@ -336,13 +348,15 @@ function raider_get_default_pricing() {
 		),
 		array(
 			'group'    => 'Asiakaskokemusvideo',
-			'title'    => 'Lyhytvideo',
+			'title'    => 'Kevyt asiakasreferenssi',
 			'price'    => '300 €',
 			'unit'     => '/kpl',
 			'features' => array(
-				'Kuvaus + editointi',
-				'Napakka asiakaskokemus lyhytvideon muodossa',
-				'Mainio Reels / TikTok / Shorts -käyttöön',
+				'Videon kesto noin 1 min',
+				'Kevyellä tyylillä kuvattu ja toteutettu, mutta laadukas',
+				'Dronekuvaus',
+				'Kuvituskuvat',
+				'Haastattelukuvaus',
 			),
 			'cta_text' => 'Pyydä tarjous',
 			'cta_url'  => $ota,
@@ -375,6 +389,106 @@ function raider_get_default_pricing() {
 		),
 	);
 }
+
+/* ---------- One-time update of imported cards (11/2026 price list) ---------- */
+
+/**
+ * If the bundled defaults were imported into the CPT, changing the defaults in
+ * code no longer reaches the page. This brings imported cards up to date once:
+ *   - "10 kpl lyhytvideoita" 1 800 € becomes the 16-video package,
+ *   - a new 10-video package at 1 000 € is added before it,
+ *   - "Lyhytvideo" 300 € becomes "Kevyt asiakasreferenssi".
+ * A card is only touched while its title and price still match the old default,
+ * so anything the admin has already edited by hand is left alone.
+ */
+add_action(
+	'init',
+	function () {
+		if ( (int) get_option( 'raider_pricing_data_version' ) >= 2 ) {
+			return;
+		}
+		update_option( 'raider_pricing_data_version', 2 );
+
+		$posts = get_posts(
+			array(
+				'post_type'      => RAIDER_PRICE_CPT,
+				'posts_per_page' => 50,
+				'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
+				'no_found_rows'  => true,
+			)
+		);
+		if ( empty( $posts ) ) {
+			return; // Nothing imported: the page already renders the new defaults.
+		}
+
+		$defaults = array();
+		foreach ( raider_get_default_pricing() as $card ) {
+			$defaults[ $card['title'] ] = $card;
+		}
+		$has_small_package = false;
+		$old_package       = null;
+		$old_reference     = null;
+		foreach ( $posts as $p ) {
+			$amount = preg_replace( '/[^0-9]/', '', (string) get_post_meta( $p->ID, '_raider_price_amount', true ) );
+			if ( '1000' === $amount ) {
+				$has_small_package = true;
+			}
+			if ( '10 kpl lyhytvideoita' === $p->post_title && '1800' === $amount ) {
+				$old_package = $p;
+			}
+			if ( 'Lyhytvideo' === $p->post_title && '300' === $amount ) {
+				$old_reference = $p;
+			}
+		}
+
+		if ( $old_package ) {
+			wp_update_post(
+				array(
+					'ID'         => $old_package->ID,
+					'post_title' => '16 kpl lyhytvideoita',
+				)
+			);
+			$features = (string) get_post_meta( $old_package->ID, '_raider_price_features', true );
+			update_post_meta( $old_package->ID, '_raider_price_features', str_replace( '10 julkaisuvalmista', '16 julkaisuvalmista', $features ) );
+
+			if ( ! $has_small_package ) {
+				$card    = $defaults['10 kpl lyhytvideoita'];
+				$post_id = wp_insert_post(
+					array(
+						'post_type'   => RAIDER_PRICE_CPT,
+						'post_title'  => $card['title'],
+						'post_status' => $old_package->post_status,
+						'menu_order'  => max( 0, (int) $old_package->menu_order - 5 ),
+					)
+				);
+				if ( $post_id && ! is_wp_error( $post_id ) ) {
+					$group = get_post_meta( $old_package->ID, '_raider_price_group', true );
+					update_post_meta( $post_id, '_raider_price_group', $group ? $group : $card['group'] );
+					update_post_meta( $post_id, '_raider_price_amount', $card['price'] );
+					update_post_meta( $post_id, '_raider_price_unit', $card['unit'] );
+					update_post_meta( $post_id, '_raider_price_features', implode( "
+", $card['features'] ) );
+					update_post_meta( $post_id, '_raider_price_cta_text', $card['cta_text'] );
+				}
+			}
+		}
+
+		if ( $old_reference ) {
+			$card = $defaults['Kevyt asiakasreferenssi'];
+			wp_update_post(
+				array(
+					'ID'         => $old_reference->ID,
+					'post_title' => $card['title'],
+				)
+			);
+			update_post_meta( $old_reference->ID, '_raider_price_features', implode( "
+", $card['features'] ) );
+		}
+
+		raider_pricing_clear_cache();
+	},
+	20
+);
 
 /* ---------- Front-end: grouped, cached fetch ---------- */
 
